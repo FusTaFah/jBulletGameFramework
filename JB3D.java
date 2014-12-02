@@ -90,7 +90,7 @@ public class JB3D extends Application{
         p.setTranslateX(0);
         p.setTranslateY(20);
         p.setTranslateZ(70);
-//        p.
+        root.getChildren().add(p);
         
         //add the group to the scene
         Scene scene = new Scene(root, 700, 500, true);
@@ -116,17 +116,6 @@ public class JB3D extends Application{
                 for(Cube body : dw.getBodies()){
                     render(body.getBox(), body);
                 }
-                System.out.println(wPressed);
-                System.out.println(dPressed);
-                System.out.println(sPressed);
-                System.out.println(aPressed);
-                System.out.println(wPressed);
-                System.out.println(spacePressed);
-                System.out.println(iPressed);
-                System.out.println(lPressed);
-                System.out.println(kPressed);
-                System.out.println(jPressed);
-                System.out.println();
 //                Transform t = new Transform();
 //                Vector3f v3f1 = new Vector3f();
 //                Vector3f v3f2 = new Vector3f();
@@ -153,11 +142,12 @@ public class JB3D extends Application{
     }
     
     private void buildCamera() {
-        root.getChildren().add(cameraXform);
-        cameraXform.getChildren().add(cameraXform2);
-        cameraXform2.getChildren().add(cameraXform3);
-        cameraXform3.getChildren().add(camera);
-        cameraXform3.setRotateZ(180.0);
+//        root.getChildren().add(cameraXform);
+//        cameraXform.getChildren().add(cameraXform2);
+//        cameraXform2.getChildren().add(cameraXform3);
+//        cameraXform3.getChildren().add(camera);
+//        cameraXform3.setRotateZ(180.0);
+        camera.setRotate(180.0);
         camera.setFarClip(300);
     }
     
@@ -174,9 +164,17 @@ public class JB3D extends Application{
         if(jPressed){
             camera.setRotationAxis(new Point3D(0, 1, 0));
             camera.setRotate(camera.getRotate()-1);
-        }else if(lPressed){
+        }if(lPressed){
             camera.setRotationAxis(new Point3D(0, 1, 0));
             camera.setRotate(camera.getRotate()+1);
+        }if(iPressed){
+            camera.setRotationAxis(new Point3D(0, 1, 0));
+            camera.setTranslateX(camera.getTranslateX() + 1*Math.sin((camera.getRotate())*(Math.PI/180)));
+            camera.setTranslateZ(camera.getTranslateZ() + 1*Math.cos((camera.getRotate())*(Math.PI/180)));
+        }if(kPressed){
+            camera.setRotationAxis(new Point3D(0, 1, 0));
+            camera.setTranslateX(camera.getTranslateX() - 1*Math.sin((camera.getRotate())*(Math.PI/180)));
+            camera.setTranslateZ(camera.getTranslateZ() - 1*Math.cos((camera.getRotate())*(Math.PI/180)));
         }
     }
     
