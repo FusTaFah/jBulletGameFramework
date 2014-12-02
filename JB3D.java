@@ -142,12 +142,12 @@ public class JB3D extends Application{
     }
     
     private void buildCamera() {
-//        root.getChildren().add(cameraXform);
-//        cameraXform.getChildren().add(cameraXform2);
-//        cameraXform2.getChildren().add(cameraXform3);
-//        cameraXform3.getChildren().add(camera);
-//        cameraXform3.setRotateZ(180.0);
-        camera.setRotate(180.0);
+        root.getChildren().add(cameraXform);
+        cameraXform.getChildren().add(cameraXform2);
+        cameraXform2.getChildren().add(cameraXform3);
+        cameraXform3.getChildren().add(camera);
+        cameraXform3.setRotateZ(180.0);
+//        camera.setRotate(180.0);
         camera.setFarClip(300);
     }
     
