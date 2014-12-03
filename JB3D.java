@@ -5,9 +5,6 @@
  */
 package jb3d;
 
-import com.bulletphysics.collision.broadphase.DbvtBroadphase;
-import com.bulletphysics.collision.dispatch.CollisionDispatcher;
-import com.bulletphysics.collision.dispatch.DefaultCollisionConfiguration;
 import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
 import javafx.animation.TimelineBuilder;
@@ -19,13 +16,12 @@ import javafx.scene.shape.Box;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 import com.bulletphysics.dynamics.*;
-import com.bulletphysics.dynamics.constraintsolver.SequentialImpulseConstraintSolver;
-import com.bulletphysics.linearmath.Transform;
 import javafx.geometry.Point3D;
 import javafx.scene.Group;
 import javafx.scene.PerspectiveCamera;
 import static javafx.scene.input.KeyCode.W;
 import javafx.scene.input.KeyEvent;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Shape3D;
 import javax.vecmath.Vector3f;
@@ -36,9 +32,8 @@ import javax.vecmath.Vector3f;
  */
 public class JB3D extends Application{
     
-    private Box b;
-    private Box grnd;
     private World dw;
+    private Cube player;
     private final PerspectiveCamera camera = new PerspectiveCamera(true);
     private final Xform cameraXform = new Xform();
     private final Xform cameraXform2 = new Xform();
@@ -55,8 +50,6 @@ public class JB3D extends Application{
     private boolean spacePressed = false;
     private Group root;
     
-    
-    
     @Override
     public void start(Stage primaryStage) {
         
@@ -65,8 +58,8 @@ public class JB3D extends Application{
         
         //create the bodies in the world
         int width = 5;
-        Cube rb = new Cube(dw, width, width, width, false, 1, javafx.scene.paint.Color.GREEN);
-        rb.translate(new Vector3f(0, 20, 70));
+        player = new Cube(dw, width, width, width, false, 1, javafx.scene.paint.Color.GREEN);
+        player.translate(new Vector3f(0, 20, 70));
         
         
         //create the ground
@@ -97,9 +90,9 @@ public class JB3D extends Application{
         
         //handle the inputs
         handleKeyboard(scene);
-//        handleMouse(scene);
-        primaryStage.setTitle("Hello World!");
+        handleMouse(scene);
         
+        primaryStage.setTitle("Hello World!");
         primaryStage.setScene(scene);
         primaryStage.show();
         scene.setCamera(camera);
@@ -111,19 +104,12 @@ public class JB3D extends Application{
             @Override
             public void handle(Event e) {
                 dw.stepSimulation((float)d.toMillis());
-                rb.activate();
-                keyControls(rb, new Vector3f());
+                player.activate();
+                keyControls(player, new Vector3f());
                 for(Cube body : dw.getBodies()){
                     render(body.getBox(), body);
                 }
-//                Transform t = new Transform();
-//                Vector3f v3f1 = new Vector3f();
-//                Vector3f v3f2 = new Vector3f();
-//                rb.getCollisionShape().getAabb(t, v3f1, v3f2);
-//                System.out.println("Position: x="+t.origin.x+" y="+t.origin.y+" z="+t.origin.z);
-//                System.out.println("Min: x="+v3f1.x+" y="+v3f1.y+" z="+v3f1.z);
-//                System.out.println("Max: x="+v3f2.x+" y="+v3f2.y+" z="+v3f2.z+'\n');
-                
+                updateCamera();
             }
         });
         
@@ -147,8 +133,19 @@ public class JB3D extends Application{
         cameraXform2.getChildren().add(cameraXform3);
         cameraXform3.getChildren().add(camera);
         cameraXform3.setRotateZ(180.0);
-//        camera.setRotate(180.0);
         camera.setFarClip(300);
+    }
+    
+    private void updateCamera(){
+        
+        camera.setTranslateX(-player.getCenterOfMassPosition(new Vector3f()).x);
+        camera.setTranslateZ(player.getCenterOfMassPosition(new Vector3f()).z - 20);
+        double diffX = camera.getTranslateX() - player.getCenterOfMassPosition(new Vector3f()).x;
+        double diffY = camera.getTranslateY() - player.getCenterOfMassPosition(new Vector3f()).y;
+        double diffZ = camera.getTranslateZ() - player.getCenterOfMassPosition(new Vector3f()).z;
+        camera.setRotationAxis(new Point3D(0, 1, 0));
+        double angleBetweenXA = diffZ < 0 ? Math.atan(-diffX/diffZ)/(Math.PI/180) : Math.atan(-diffX/diffZ)/(Math.PI/180) + 180;
+        camera.setRotate(angleBetweenXA);
     }
     
     private void keyControls(RigidBody rb, Vector3f v){
@@ -161,21 +158,42 @@ public class JB3D extends Application{
         else if(spacePressed) rb.setLinearVelocity(new Vector3f(rbSpeed.x, 10, rbSpeed.z));
         else if(!wPressed && !dPressed && !sPressed && !aPressed && !spacePressed)
             rb.setLinearVelocity(new Vector3f(0, rbSpeed.y, 0));
-        if(jPressed){
-            camera.setRotationAxis(new Point3D(0, 1, 0));
-            camera.setRotate(camera.getRotate()-1);
-        }if(lPressed){
-            camera.setRotationAxis(new Point3D(0, 1, 0));
-            camera.setRotate(camera.getRotate()+1);
-        }if(iPressed){
-            camera.setRotationAxis(new Point3D(0, 1, 0));
-            camera.setTranslateX(camera.getTranslateX() + 1*Math.sin((camera.getRotate())*(Math.PI/180)));
-            camera.setTranslateZ(camera.getTranslateZ() + 1*Math.cos((camera.getRotate())*(Math.PI/180)));
-        }if(kPressed){
-            camera.setRotationAxis(new Point3D(0, 1, 0));
-            camera.setTranslateX(camera.getTranslateX() - 1*Math.sin((camera.getRotate())*(Math.PI/180)));
-            camera.setTranslateZ(camera.getTranslateZ() - 1*Math.cos((camera.getRotate())*(Math.PI/180)));
-        }
+//        if(jPressed){
+//            camera.setRotationAxis(new Point3D(0, 1, 0));
+//            camera.setRotate(camera.getRotate()-1);
+//        }if(lPressed){
+//            camera.setRotationAxis(new Point3D(0, 1, 0));
+//            camera.setRotate(camera.getRotate()+1);
+//        }if(iPressed){
+//            camera.setRotationAxis(new Point3D(0, 1, 0));
+//            camera.setTranslateX(camera.getTranslateX() + 1*Math.sin((camera.getRotate())*(Math.PI/180)));
+//            camera.setTranslateZ(camera.getTranslateZ() + 1*Math.cos((camera.getRotate())*(Math.PI/180)));
+//        }if(kPressed){
+//            camera.setRotationAxis(new Point3D(0, 1, 0));
+//            camera.setTranslateX(camera.getTranslateX() - 1*Math.sin((camera.getRotate())*(Math.PI/180)));
+//            camera.setTranslateZ(camera.getTranslateZ() - 1*Math.cos((camera.getRotate())*(Math.PI/180)));
+//        }
+    }
+    
+    private void handleMouse(Scene scene){
+        scene.setOnMouseMoved(new EventHandler<MouseEvent>(){
+            private double oldX;
+            private double oldY;
+            private double newX;
+            private double newY;
+            
+            @Override
+            public void handle(MouseEvent m){
+                oldX = newX;
+                oldY = newY;
+                newX = m.getScreenX();
+                newY = m.getScreenY();
+                double xDiff = oldX - newX;
+//                double yDiff = Math.abs(oldY - newY);
+//                camera.setTranslateX(Math.abs(camera.getTranslateX() - player.getCenterOfMassPosition(new Vector3f()).x)*Math.sin(xDiff*(Math.PI/180)));
+//                camera.setTranslateZ(Math.abs(camera.getTranslateZ() - player.getCenterOfMassPosition(new Vector3f()).z)*Math.cos(xDiff*(Math.PI/180)));
+            }
+        });
     }
     
     private void handleKeyboard(Scene scene){
@@ -193,14 +211,14 @@ public class JB3D extends Application{
                         break;
                     case SPACE: spacePressed = true;
                         break;
-                    case I: iPressed = true;
-                        break;
-                    case L: lPressed = true;
-                        break;
-                    case K: kPressed = true;
-                        break;
-                    case J: jPressed = true;
-                        break;
+//                    case I: iPressed = true;
+//                        break;
+//                    case L: lPressed = true;
+//                        break;
+//                    case K: kPressed = true;
+//                        break;
+//                    case J: jPressed = true;
+//                        break;
                 }
             }
         });
@@ -218,14 +236,14 @@ public class JB3D extends Application{
                         break;
                     case SPACE: spacePressed = false;
                         break;
-                    case I: iPressed = false;
-                        break;
-                    case L: lPressed = false;
-                        break;
-                    case K: kPressed = false;
-                        break;
-                    case J: jPressed = false;
-                        break;
+//                    case I: iPressed = false;
+//                        break;
+//                    case L: lPressed = false;
+//                        break;
+//                    case K: kPressed = false;
+//                        break;
+//                    case J: jPressed = false;
+//                        break;
                 }
             }
         });
