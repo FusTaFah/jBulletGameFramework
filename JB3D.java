@@ -90,7 +90,7 @@ public class JB3D extends Application{
         
         //handle the inputs
         handleKeyboard(scene);
-        handleMouse(scene);
+//        handleMouse(scene);
         
         primaryStage.setTitle("Hello World!");
         primaryStage.setScene(scene);
@@ -138,14 +138,15 @@ public class JB3D extends Application{
     
     private void updateCamera(){
         
-        camera.setTranslateX(-player.getCenterOfMassPosition(new Vector3f()).x);
+        camera.setTranslateX(player.getCenterOfMassPosition(new Vector3f()).x);
         camera.setTranslateZ(player.getCenterOfMassPosition(new Vector3f()).z - 20);
         double diffX = camera.getTranslateX() - player.getCenterOfMassPosition(new Vector3f()).x;
         double diffY = camera.getTranslateY() - player.getCenterOfMassPosition(new Vector3f()).y;
         double diffZ = camera.getTranslateZ() - player.getCenterOfMassPosition(new Vector3f()).z;
         camera.setRotationAxis(new Point3D(0, 1, 0));
-        double angleBetweenXA = diffZ < 0 ? Math.atan(-diffX/diffZ)/(Math.PI/180) : Math.atan(-diffX/diffZ)/(Math.PI/180) + 180;
-        camera.setRotate(angleBetweenXA);
+//        double angleBetweenXA = diffZ < 0 ? Math.atan(-diffX/diffZ)/(Math.PI/180) : Math.atan(-diffX/diffZ)/(Math.PI/180) + 180;
+//        camera.setRotate(angleBetweenXA);
+        System.out.println(diffX + "            " + diffZ + "            " + diffY);
     }
     
     private void keyControls(RigidBody rb, Vector3f v){
@@ -189,9 +190,10 @@ public class JB3D extends Application{
                 newX = m.getScreenX();
                 newY = m.getScreenY();
                 double xDiff = oldX - newX;
-//                double yDiff = Math.abs(oldY - newY);
-//                camera.setTranslateX(Math.abs(camera.getTranslateX() - player.getCenterOfMassPosition(new Vector3f()).x)*Math.sin(xDiff*(Math.PI/180)));
-//                camera.setTranslateZ(Math.abs(camera.getTranslateZ() - player.getCenterOfMassPosition(new Vector3f()).z)*Math.cos(xDiff*(Math.PI/180)));
+                double yDiff = Math.abs(oldY - newY);
+                System.out.println(xDiff);
+                camera.setTranslateX(player.getCenterOfMassPosition(new Vector3f()).x - camera.getTranslateX() + /*camera.getTranslateX()**/Math.sin(xDiff*(Math.PI/180)));
+                camera.setTranslateZ(player.getCenterOfMassPosition(new Vector3f()).z - camera.getTranslateZ() + /*camera.getTranslateZ()**/Math.cos(xDiff*(Math.PI/180)));
             }
         });
     }
@@ -211,14 +213,6 @@ public class JB3D extends Application{
                         break;
                     case SPACE: spacePressed = true;
                         break;
-//                    case I: iPressed = true;
-//                        break;
-//                    case L: lPressed = true;
-//                        break;
-//                    case K: kPressed = true;
-//                        break;
-//                    case J: jPressed = true;
-//                        break;
                 }
             }
         });
@@ -236,14 +230,6 @@ public class JB3D extends Application{
                         break;
                     case SPACE: spacePressed = false;
                         break;
-//                    case I: iPressed = false;
-//                        break;
-//                    case L: lPressed = false;
-//                        break;
-//                    case K: kPressed = false;
-//                        break;
-//                    case J: jPressed = false;
-//                        break;
                 }
             }
         });
